@@ -11,6 +11,23 @@ Unlike PyTorch (which has 2000+ operators), MLX requires only about 100–200 ke
 ### 3. PoCL‑remote enables distributed training – like NCCL but open
 [PoCL‑remote](http://portablecl.org/docs/html/remote.html) allows OpenCL devices across a network to appear as local devices. By building a collective communication layer on top (AllReduce, Broadcast, etc.), we can create an **NCCL‑like distributed training framework** that works on any hardware supporting OpenCL. This is especially valuable in the era of big data, where cost‑effective consumer GPUs or accelerators can be interconnected via standard Ethernet – network speed becomes the primary bottleneck, but the approach is still practical for many workloads.
 
+### 4. Lower the risk and shorten the development curve
+
+The widespread success of CUDA in accelerating machine learning workloads, together with the recent emergence of a Vulkan backend for MLX in just the past few months, provides an important and practical reference for this work. 
+
+clBLAST – Heavily involved in tuning; its optimisations (especially for matrix multiplication) can be adapted for MLX’s core primitives.
+
+vkFFT – Provides an OpenCL interface for FFT; valuable for spectral operations in MLX.
+
+AnySparse – Our revived version of clSparse, offering efficient sparse problem solvers.
+
+AnyMagma – Our revived version of clMAGMA, useful for matrix decompositions and dense linear algebra.
+
+AnyArray – Derived from Octave’s ocl; serves as our version of a GPU array, similar to MATLAB’s gpuArray.
+
+PoCL – We have experience configuring PoCL for dual devices on Apple Silicon and using PoCL‑remote for cluster setups.
+
+
 ### Summary
 - ✅ MLX’s simple backend interface lowers the porting effort.
 - ✅ A small set of primitives keeps the task tractable.

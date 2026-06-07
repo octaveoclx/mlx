@@ -38,7 +38,9 @@ If you are interested in contributing to an OpenCL backend for MLX, let’s conn
 From Prof. Jinchuan Tang
 
 # Progress
-2026.6.7: sucessfully create and build a basic OpenCL framework to align with the work of :[vulkan 2026.3.4](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498)
+2026.6.8: align with the work of [vulkan 2026.3.5](https://github.com/NripeshN/mlx/commit/09371e55508518caadcc05f1aa2ea3d2225fdcac). Compared to the Vulkan backend, the OpenCL backend's core GPU kernel dispatch functions (such as binary, unary, reduce, softmax, scan, etc.) are still placeholder implementations that throw exceptions, and no real OpenCL kernel code has been written yet.
+
+2026.6.7: sucessfully create and build a basic OpenCL framework to align with the work of [vulkan 2026.3.4](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498)
 
 
 # MLX

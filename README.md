@@ -20,7 +20,8 @@ If you are interested in contributing to an OpenCL backend for MLX, let’s conn
 
 From Prof. Jinchuan Tang
 
-
+# Progress
+2026.6.7: sucessfully create and build a basic OpenCL framework to align with the work of :[vulkan 2026.3.4](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498)
 
 
 # MLX

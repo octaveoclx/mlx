@@ -1,3 +1,28 @@
+## Why MLX + OpenCL is a promising direction
+
+MLX has significant untapped potential when combined with OpenCL. Here’s why the time is right to start this work.
+
+### 1. MLX’s architecture is naturally suited for OpenCL
+MLX has a clean, layered design with a well-defined backend abstraction (`Primitive::eval_gpu`). Existing Metal and Vulkan backends already demonstrate how to implement compute kernels without heavy runtime dependencies. Adding an OpenCL backend fits directly into this model – reusing the same 100–200 core primitives.
+
+### 2. A manageable number of primitives makes collaboration feasible
+Unlike PyTorch (which has 2000+ operators), MLX requires only about 100–200 kernel primitives to reach full functionality. This small scale means a small team (or even a dedicated individual) can realistically implement all required GPU kernels for OpenCL, without needing a massive contributor base.
+
+### 3. PoCL‑remote enables distributed training – like NCCL but open
+[PoCL‑remote](http://portablecl.org/docs/html/remote.html) allows OpenCL devices across a network to appear as local devices. By building a collective communication layer on top (AllReduce, Broadcast, etc.), we can create an **NCCL‑like distributed training framework** that works on any hardware supporting OpenCL. This is especially valuable in the era of big data, where cost‑effective consumer GPUs or accelerators can be interconnected via standard Ethernet – network speed becomes the primary bottleneck, but the approach is still practical for many workloads.
+
+### Summary
+- ✅ MLX’s simple backend interface lowers the porting effort.
+- ✅ A small set of primitives keeps the task tractable.
+- ✅ PoCL‑remote offers a path to open, multi‑vendor distributed training.
+
+If you are interested in contributing to an OpenCL backend for MLX, let’s connect!
+
+From Prof. Jinchuan Tang
+
+
+
+
 # MLX
 
 [**Quickstart**](#quickstart) | [**Installation**](#installation) |

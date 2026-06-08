@@ -40,23 +40,23 @@ From Prof. Jinchuan Tang
 # Progress
 2026.6.9
 Add flexible type support using the same kernel differentiaing by TYPE macro.
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ ./test_add
-OpenCL is available.
-Device name: Intel(R) Iris(R) Xe Graphics
-Default device: gpu
-Before eval, c data type: float32
-eval_binary_opencl_or_cpu called for add
-try_eval_binary_op_opencl called for add
-Result: array([5, 7, 9], dtype=float32)
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$
-g++ -std=c++20 -o test_add_fp16 ../test_add_fp16.cpp -I.. -L. -lmlx -lOpenCL -lopenblas -llapack -lgfortran -lpthread
-./test_add_fp16
-OpenCL device: Intel(R) Iris(R) Xe Graphics
-eval_binary_opencl_or_cpu called for add
-try_eval_binary_op_opencl called for add
-float16 addition result: array([5, 7, 9], dtype=float16)
-Expected: [5, 7, 9], got: [5, 7, 9]
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ 
+   (base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ ./test_add
+   OpenCL is available.
+   Device name: Intel(R) Iris(R) Xe Graphics
+   Default device: gpu
+   Before eval, c data type: float32
+   eval_binary_opencl_or_cpu called for add
+   try_eval_binary_op_opencl called for add
+   Result: array([5, 7, 9], dtype=float32)
+   (base) jc@U1:~/Downloads/mlx-feat-vulkan/build$
+   g++ -std=c++20 -o test_add_fp16 ../test_add_fp16.cpp -I.. -L. -lmlx -lOpenCL -lopenblas -llapack -lgfortran -lpthread
+   ./test_add_fp16
+   OpenCL device: Intel(R) Iris(R) Xe Graphics
+   eval_binary_opencl_or_cpu called for add
+   try_eval_binary_op_opencl called for add
+   float16 addition result: array([5, 7, 9], dtype=float16)
+   Expected: [5, 7, 9], got: [5, 7, 9]
+   (base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ 
 
 
 2026.6.8: align with the work of [vulkan 2026.3.5](https://github.com/NripeshN/mlx/commit/09371e55508518caadcc05f1aa2ea3d2225fdcac). Compared to the Vulkan backend, the OpenCL backend's core GPU kernel dispatch functions (such as binary, unary, reduce, softmax, scan, etc.) are still placeholder implementations that throw exceptions, and no real OpenCL kernel code has been written yet.

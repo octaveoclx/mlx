@@ -38,6 +38,13 @@ If you are interested in contributing to an OpenCL backend for MLX, let’s conn
 From Prof. Jinchuan Tang
 
 # Progress
+2026.6.11
+Add support of FP16 in CLBLAST for [Apple Silicon and NVIDIA GPUs](https://github.com/CNugteren/CLBlast/commit/f78f6dd0edd5f24441f61bfade262e8a0684ce70). [Discussion](https://github.com/CNugteren/CLBlast/issues/667) [Discussion2https://forums.developer.nvidia.com/t/gtx-1660-super-tu116-not-exposing-fp16-on-driver-580-94-16/359199/6]()
+Add FP16 in the Apple Silicon with help of [ICD warpper](https://github.com/octaveoclx/ocl_icd_wrapper/tree/cl_khr_fp16).
+Support direct binary add and broadcast add.
+Add promote and demote to kernels to supoort bf16 - float simulation, FP16 - float simulation if does not work, FP32, F64, u/intXX.
+UMA enabled with Apple silicon, Intel Xe laptop GPU+CPU, and normal copy buffer behavior for DGPUs.
+
 2026.6.9
 Add flexible type support using the same kernel differentiaing by TYPE macro.
 ```bash

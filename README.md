@@ -1,3 +1,40 @@
+# Progress
+2026.6.11
+Add support of FP16 in CLBLAST for [Apple Silicon and NVIDIA GPUs](https://github.com/CNugteren/CLBlast/commit/f78f6dd0edd5f24441f61bfade262e8a0684ce70). 
+[Discussion](https://github.com/CNugteren/CLBlast/issues/667) 
+[Discussion2]https://forums.developer.nvidia.com/t/gtx-1660-super-tu116-not-exposing-fp16-on-driver-580-94-16/359199/6]()
+Add FP16 in the Apple Silicon with help of [ICD warpper](https://github.com/octaveoclx/ocl_icd_wrapper/tree/cl_khr_fp16).
+Support direct binary add and broadcast add.
+Add promote and demote to kernels to supoort bf16 - float simulation, FP16 - float simulation if does not work, FP32, F64, u/intXX.
+UMA enabled with Apple silicon, Intel Xe laptop GPU+CPU, and normal copy buffer behavior for DGPUs.
+
+2026.6.9
+Add flexible type support using the same kernel differentiaing by TYPE macro.
+```bash
+(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ ./test_add
+OpenCL is available.
+Device name: Intel(R) Iris(R) Xe Graphics
+Default device: gpu
+Before eval, c data type: float32
+eval_binary_opencl_or_cpu called for add
+try_eval_binary_op_opencl called for add
+Result: array([5, 7, 9], dtype=float32)
+(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$
+g++ -std=c++20 -o test_add_fp16 ../test_add_fp16.cpp -I.. -L. -lmlx -lOpenCL -lopenblas -llapack -lgfortran -lpthread
+./test_add_fp16
+OpenCL device: Intel(R) Iris(R) Xe Graphics
+eval_binary_opencl_or_cpu called for add
+try_eval_binary_op_opencl called for add
+float16 addition result: array([5, 7, 9], dtype=float16)
+Expected: [5, 7, 9], got: [5, 7, 9]
+(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ 
+```
+
+2026.6.8: align with the work of [vulkan 2026.3.5](https://github.com/NripeshN/mlx/commit/09371e55508518caadcc05f1aa2ea3d2225fdcac). Compared to the Vulkan backend, the OpenCL backend's core GPU kernel dispatch functions (such as binary, unary, reduce, softmax, scan, etc.) are still placeholder implementations that throw exceptions, and no real OpenCL kernel code has been written yet.
+
+2026.6.7: sucessfully create and build a basic OpenCL framework to align with the work of [vulkan 2026.3.4](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498)
+
+
 ## Why MLX + OpenCL is a promising direction
 
 MLX has significant untapped potential when combined with OpenCL. Here’s why the time is right to start this work.
@@ -37,41 +74,6 @@ If you are interested in contributing to an OpenCL backend for MLX, let’s conn
 
 From Prof. Jinchuan Tang
 
-# Progress
-2026.6.11
-Add support of FP16 in CLBLAST for [Apple Silicon and NVIDIA GPUs](https://github.com/CNugteren/CLBlast/commit/f78f6dd0edd5f24441f61bfade262e8a0684ce70). 
-[Discussion](https://github.com/CNugteren/CLBlast/issues/667) 
-[Discussion2]https://forums.developer.nvidia.com/t/gtx-1660-super-tu116-not-exposing-fp16-on-driver-580-94-16/359199/6]()
-Add FP16 in the Apple Silicon with help of [ICD warpper](https://github.com/octaveoclx/ocl_icd_wrapper/tree/cl_khr_fp16).
-Support direct binary add and broadcast add.
-Add promote and demote to kernels to supoort bf16 - float simulation, FP16 - float simulation if does not work, FP32, F64, u/intXX.
-UMA enabled with Apple silicon, Intel Xe laptop GPU+CPU, and normal copy buffer behavior for DGPUs.
-
-2026.6.9
-Add flexible type support using the same kernel differentiaing by TYPE macro.
-```bash
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ ./test_add
-OpenCL is available.
-Device name: Intel(R) Iris(R) Xe Graphics
-Default device: gpu
-Before eval, c data type: float32
-eval_binary_opencl_or_cpu called for add
-try_eval_binary_op_opencl called for add
-Result: array([5, 7, 9], dtype=float32)
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$
-g++ -std=c++20 -o test_add_fp16 ../test_add_fp16.cpp -I.. -L. -lmlx -lOpenCL -lopenblas -llapack -lgfortran -lpthread
-./test_add_fp16
-OpenCL device: Intel(R) Iris(R) Xe Graphics
-eval_binary_opencl_or_cpu called for add
-try_eval_binary_op_opencl called for add
-float16 addition result: array([5, 7, 9], dtype=float16)
-Expected: [5, 7, 9], got: [5, 7, 9]
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ 
-```
-
-2026.6.8: align with the work of [vulkan 2026.3.5](https://github.com/NripeshN/mlx/commit/09371e55508518caadcc05f1aa2ea3d2225fdcac). Compared to the Vulkan backend, the OpenCL backend's core GPU kernel dispatch functions (such as binary, unary, reduce, softmax, scan, etc.) are still placeholder implementations that throw exceptions, and no real OpenCL kernel code has been written yet.
-
-2026.6.7: sucessfully create and build a basic OpenCL framework to align with the work of [vulkan 2026.3.4](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498)
 
 
 # MLX

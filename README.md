@@ -77,6 +77,27 @@ AnyArray – Derived from Octave’s ocl; serves as our version of a GPU array, 
 
 PoCL – We have experience configuring PoCL for dual devices on Apple Silicon and using PoCL‑remote for cluster setups.
 
+### 5. Why MLX reduce the number of operators -- from DeepSeek
+
+In traditional frameworks like PyTorch's ATen, covering various combinations (e.g., the gradient of sin(cos(x)), batched sin, or a fused sin+cos+exp kernel) often requires:
+
+Explicitly implementing forward operators: Sin, Cos, Mul, Exp, etc.
+
+Explicitly implementing backward operators: SinBackward, CosBackward, MulBackward, etc.
+
+Explicitly implementing batched versions: BatchSin, BatchCos (or relying on broadcasting, which often still requires separate optimizations).
+
+Manually writing fused kernels like FusedSinCosExpKernel and their corresponding backward pass.
+
+MLX, in contrast, implements only the most basic forward kernels (e.g., sin, cos, mul, exp) along with their VJP (vector-Jacobian product) rules. Then, through three powerful function transforms:
+
+grad → automatically generates the reverse pass for any arbitrarily complex function.
+
+vmap → automatically generates batched versions.
+
+compile → automatically generates fused kernels.
+
+The synergy of these three transforms allows MLX to cover the same functional space that would require hundreds or even thousands of operators in frameworks like PyTorch, using only a few dozen basic primitives.
 
 ### Summary
 - ✅ MLX’s simple backend interface lowers the porting effort.

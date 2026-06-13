@@ -1,7 +1,10 @@
 # Progress
 2026.6.13
+
 OpenCL conversion of Prof. Mike Giles's work on [erfinv](https://people.maths.ox.ac.uk/gilesm/codes/erfinv/).
+
 Add FP64 support.
+
 Full Unary coded.
 
 2026.6.11

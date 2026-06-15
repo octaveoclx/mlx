@@ -1,4 +1,19 @@
 # Progress
+
+2026.6.16
+
+-Corrected Transpose::eval_gpu and Reshape::eval_gpu
+
+    Replaced naive buffer sharing with proper metadata handling using transpose_in_eval and reshape_in_eval to create zero‑copy views with correct strides and contiguity flags.
+
+    Eliminated segmentation faults caused by mismatched logical/physical layouts.
+
+-Improved reshape_gpu
+
+    Added a condition to only use zero‑copy sharing when the input is row‑contiguous and the last stride is 1.
+
+    For non‑contiguous inputs, forced an explicit GPU‑side (or CPU) copy to produce a truly contiguous output, fixing incorrect results in multi‑axis reductions (e.g., sum over axes (0,2) on a 2×2×2 tensor).
+
 2026.6.13
 
 OpenCL conversion of Prof. Mike Giles's work on [erfinv](https://people.maths.ox.ac.uk/gilesm/codes/erfinv/).

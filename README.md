@@ -1,6 +1,7 @@
 # Progress
 
 2026.6.16
+-Framework support for reduction operations.
 
 -Corrected Transpose::eval_gpu and Reshape::eval_gpu
 

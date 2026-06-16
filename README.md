@@ -1,6 +1,13 @@
 # Progress
 
 2026.6.16
+
+-fix, copy_unary correctly handles arbitrary strides, enabling correct GPU‑side copies for 3D transposed data
+
+-Implemented and enabled GPU transpose copy
+
+- enabling GPU‑accelerated copies instead of always falling back to CPU.
+
 -Framework support for reduction operations.
 
 -Corrected Transpose::eval_gpu and Reshape::eval_gpu

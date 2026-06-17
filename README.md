@@ -3,33 +3,57 @@
 2026.6.17
 
 ✅ Implemented Unary Operations (by Category)
+
 Category	Operations	Notes
+
 Basic Math	Abs, Negative, Square, Ceil, Floor, Round, Sign	
+
 Exponential & Logarithm	Exp, Expm1, Log, Log1p	Log supports natural, base‑2, and base‑10 (via Log::Base enum)
+
 Trigonometric	Sin, Cos, Tan, ArcSin, ArcCos, ArcTan	
+
 Hyperbolic & Inverse	Sinh, Cosh, Tanh, ArcSinh, ArcCosh, ArcTanh	
+
 Power & Root	Sqrt, Rsqrt	Sqrt handles both via its recip parameter (false → sqrt, true → rsqrt)
+
 Special Functions	Erf, ErfInv	
+
 Logical & Bitwise	LogicalNot, BitwiseInvert	
+
 Complex Operations	Real, Imag, Conjugate	Real/Imag extract real/imag parts as real arrays; Conjugate returns complex conjugate
+
 Activation	Sigmoid	Implemented as a dedicated UnaryPrimitive (not composed)
+
 All operations above are fully validated on the OpenCL backend. If additional unary primitives exist in mlx/primitives.h that are not listed here, please let me know.
 
 ❌ NN Operations That Do NOT Require Separate OpenCL Implementation
+
 The following neural network activations and layers are not implemented as independent UnaryPrimitive primitives. Instead, they are composed from already‑supported basic operations (which are all validated on the OpenCL backend). Hence no additional GPU kernels are needed for them.
 
 Operation	Implementation	Reason
+
 ReLU	maximum(0, x)	Uses maximum (binary op, already implemented).
+
 Leaky ReLU	maximum(negative_slope * x, x)	Uses maximum, multiply, add – all available.
+
 PReLU	max(0, x) + a * min(0, x)	Uses maximum, minimum, multiply, add.
+
 Swish / SiLU	x * sigmoid(x)	Depends on sigmoid (implemented) and multiply.
+
 GELU	0.5 * x * (1 + erf(x / sqrt(2)))	Uses erf (implemented), sqrt, multiply, add.
+
 Softmax	exp(x) / sum(exp(x)) over axis	Requires exp (implemented) and sum (reduction, handled separately).
+
 LogSoftmax	log(softmax(x))	Same as Softmax plus log (implemented).
+
 ELU	x if x > 0 else α*(exp(x)-1)	Uses exp, where (or conditional logic – where is a ternary op).
+
 SELU	scale * (x if x > 0 else α*(exp(x)-1))	Similar, uses exp and basic arithmetic.
+
 Hard sigmoid / Hard swish	Piecewise linear approximations	Use comparisons and arithmetic; no transcendental functions needed.
+
 🔑 Key Points
+
 All these functions are composed from existing Primitive operations (e.g., exp, log, erf, maximum, multiply, add, where, etc.).
 
 They are not subclasses of UnaryPrimitive in MLX; they are implemented as higher‑level functions in the nn module.

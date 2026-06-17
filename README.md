@@ -2,65 +2,65 @@
 
 2026.6.17
 
-✅ Implemented Unary Operations (by Category)
+# MLX OpenCL Backend — Unary Operations Status
 
-Category	Operations	Notes
+This document summarizes the **unary operations** that are fully implemented and validated on the OpenCL backend, as well as neural network functions that **do not require** separate GPU kernel implementations.
 
-Basic Math	Abs, Negative, Square, Ceil, Floor, Round, Sign	
+---
 
-Exponential & Logarithm	Exp, Expm1, Log, Log1p	Log supports natural, base‑2, and base‑10 (via Log::Base enum)
+## ✅ Implemented Unary Primitives
 
-Trigonometric	Sin, Cos, Tan, ArcSin, ArcCos, ArcTan	
+The following `UnaryPrimitive` classes have dedicated OpenCL kernel implementations and pass all unit tests.
 
-Hyperbolic & Inverse	Sinh, Cosh, Tanh, ArcSinh, ArcCosh, ArcTanh	
+| Category | Operations | Notes |
+| :--- | :--- | :--- |
+| **Basic Math** | `Abs`, `Negative`, `Square`, `Ceil`, `Floor`, `Round`, `Sign` | |
+| **Exponential & Logarithm** | `Exp`, `Expm1`, `Log`, `Log1p` | `Log` supports natural, base‑2, and base‑10 (via `Log::Base`). |
+| **Trigonometric** | `Sin`, `Cos`, `Tan`, `ArcSin`, `ArcCos`, `ArcTan` | |
+| **Hyperbolic & Inverse** | `Sinh`, `Cosh`, `Tanh`, `ArcSinh`, `ArcCosh`, `ArcTanh` | |
+| **Power & Root** | `Sqrt`, `Rsqrt` | `Sqrt` handles both via `recip` parameter (`false` → sqrt, `true` → rsqrt). |
+| **Special Functions** | `Erf`, `ErfInv` | |
+| **Logical & Bitwise** | `LogicalNot`, `BitwiseInvert` | |
+| **Complex Operations** | `Real`, `Imag`, `Conjugate` | `Real`/`Imag` extract real/imag parts as real arrays; `Conjugate` returns complex conjugate. |
+| **Activation** | `Sigmoid` | Implemented as a dedicated `UnaryPrimitive` (not composed). |
 
-Power & Root	Sqrt, Rsqrt	Sqrt handles both via its recip parameter (false → sqrt, true → rsqrt)
+All operations above are fully validated on the OpenCL backend.
 
-Special Functions	Erf, ErfInv	
+---
 
-Logical & Bitwise	LogicalNot, BitwiseInvert	
+## ❌ NN Functions That Do **Not** Require Separate Implementation
 
-Complex Operations	Real, Imag, Conjugate	Real/Imag extract real/imag parts as real arrays; Conjugate returns complex conjugate
+The following neural network activations and layers are **not** implemented as independent `UnaryPrimitive` primitives. They are composed from already‑supported basic operations (listed above), so **no additional GPU kernels are needed**.
 
-Activation	Sigmoid	Implemented as a dedicated UnaryPrimitive (not composed)
+| Operation | Implementation | Reason (dependencies already implemented) |
+| :--- | :--- | :--- |
+| **ReLU** | `maximum(0, x)` | Uses `maximum` (binary op). |
+| **Leaky ReLU** | `maximum(negative_slope * x, x)` | Uses `maximum`, `multiply`, `add`. |
+| **PReLU** | `max(0, x) + a * min(0, x)` | Uses `maximum`, `minimum`, `multiply`, `add`. |
+| **Swish / SiLU** | `x * sigmoid(x)` | Depends on `sigmoid` (implemented) and `multiply`. |
+| **GELU** | `0.5 * x * (1 + erf(x / sqrt(2)))` | Uses `erf`, `sqrt`, `multiply`, `add`. |
+| **Softmax** | `exp(x) / sum(exp(x))` over axis | Requires `exp` (implemented) and `sum` (reduction). |
+| **LogSoftmax** | `log(softmax(x))` | Same as Softmax plus `log` (implemented). |
+| **ELU** | `x if x > 0 else α*(exp(x)-1)` | Uses `exp`, `where`. |
+| **SELU** | scale * (x if x > 0 else α*(exp(x)-1)) | Similar, uses `exp` and arithmetic. |
+| **Hard sigmoid / Hard swish** | Piecewise linear approximations | Uses comparisons and arithmetic; no transcendental functions. |
 
-All operations above are fully validated on the OpenCL backend. If additional unary primitives exist in mlx/primitives.h that are not listed here, please let me know.
+**Key point:** All these are high‑level functions in the `nn` module, not `UnaryPrimitive` subclasses. Since their building blocks are already GPU‑accelerated, they automatically run on the OpenCL backend without extra kernel development.
 
-❌ NN Operations That Do NOT Require Separate OpenCL Implementation
+---
 
-The following neural network activations and layers are not implemented as independent UnaryPrimitive primitives. Instead, they are composed from already‑supported basic operations (which are all validated on the OpenCL backend). Hence no additional GPU kernels are needed for them.
+## 📝 Notes on Missing Primitives
 
-Operation	Implementation	Reason
+Some mathematical functions that might appear to be “unary” (e.g., `Cbrt`, `Erfc`, `Lgamma`, `Tgamma`, `Trunc`, `Reciprocal`) are **not** present as `UnaryPrimitive` in MLX core. They are either:
+- Not defined as primitives,
+- Provided via CPU fallback, or
+- Composed from other operations (e.g., `Reciprocal` uses `Divide` with broadcast).
 
-ReLU	maximum(0, x)	Uses maximum (binary op, already implemented).
+Therefore, they are not listed as “missing” — they are outside the scope of `UnaryPrimitive` implementation.
 
-Leaky ReLU	maximum(negative_slope * x, x)	Uses maximum, multiply, add – all available.
+---
 
-PReLU	max(0, x) + a * min(0, x)	Uses maximum, minimum, multiply, add.
-
-Swish / SiLU	x * sigmoid(x)	Depends on sigmoid (implemented) and multiply.
-
-GELU	0.5 * x * (1 + erf(x / sqrt(2)))	Uses erf (implemented), sqrt, multiply, add.
-
-Softmax	exp(x) / sum(exp(x)) over axis	Requires exp (implemented) and sum (reduction, handled separately).
-
-LogSoftmax	log(softmax(x))	Same as Softmax plus log (implemented).
-
-ELU	x if x > 0 else α*(exp(x)-1)	Uses exp, where (or conditional logic – where is a ternary op).
-
-SELU	scale * (x if x > 0 else α*(exp(x)-1))	Similar, uses exp and basic arithmetic.
-
-Hard sigmoid / Hard swish	Piecewise linear approximations	Use comparisons and arithmetic; no transcendental functions needed.
-
-🔑 Key Points
-
-All these functions are composed from existing Primitive operations (e.g., exp, log, erf, maximum, multiply, add, where, etc.).
-
-They are not subclasses of UnaryPrimitive in MLX; they are implemented as higher‑level functions in the nn module.
-
-Since their building blocks are already GPU‑accelerated, they automatically run on the OpenCL backend without any extra kernel development.
-
-Thus, no additional implementation effort is required for these activations or layers.
+*Last updated: June 2026*
 
 2026.6.16
 

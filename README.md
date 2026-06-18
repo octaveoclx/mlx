@@ -1,7 +1,25 @@
 # Progress
 
 2026.6.18
-- Add scatter(src, indices, updates, axes)
+
+## ✅ Scatter Operations Implemented
+
+The following scatter operations have been fully implemented and validated on the OpenCL backend:
+
+- **`scatter`** (replace) — both single-axis and multi-axis variants
+- **`scatter_add`**
+- **`scatter_prod`**
+- **`scatter_max`**
+- **`scatter_min`**
+
+### 📌 Key Features
+
+- **Index types**: Supports both `int32` and `int64` index arrays
+- **Data types**: Supports `float16` and `float32`
+- **Axis handling**: Supports negative axes (automatically normalized)
+- **Edge cases**: Handles empty tensors and out-of-bounds indices (ignored silently)
+
+All operations have been tested with stride-aware comparison logic, ensuring correctness for both contiguous and non-contiguous array layouts.
 
 ## Shape & View Operations
 

@@ -1,6 +1,7 @@
 # Progress
 
 2026.6.18
+- Add scatter(src, indices, updates, axes)
 
 ## Shape & View Operations
 

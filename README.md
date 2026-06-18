@@ -2,23 +2,23 @@
 
 2026.6.18
 
-## 形状与视图操作 (Shape & View Operations)
+## Shape & View Operations
 
-| 函数 | 实现状态 |
-|------|----------|
-| `Reshape`, `Flatten`, `Unflatten`, `ExpandDims`, `Squeeze`, `BroadcastAxes` | ✅ GPU（零拷贝共享缓冲区） |
-| `Transpose` | ✅ GPU（零拷贝） |
-| `View` | ✅ GPU（共享缓冲区或 CPU 回退） |
+| Operation | Implementation Status |
+|-----------|-----------------------|
+| `Reshape`, `Flatten`, `Unflatten`, `ExpandDims`, `Squeeze`, `BroadcastAxes` | ✅ GPU (zero-copy shared buffer) |
+| `Transpose` | ✅ GPU (zero-copy) |
+| `View` | ✅ GPU (shared buffer or CPU fallback) |
 
-## 切片与拼接 (Slicing & Concatenation)
+## Slicing & Concatenation
 
-| 函数 | 实现状态 |
-|------|----------|
-| `Slice` | ✅ GPU（独立内核 `slice_unary`，已通过所有测试） |
-| `DynamicSlice` | ✅ GPU（通过 `copy_gpu_inplace`） |
-| `SliceUpdate` | ✅ GPU（独立内核 `slice_update_unary`，行连续检查） |
-| `DynamicSliceUpdate` | ✅ GPU（独立内核 `slice_update_unary`） |
-| `Concatenate` | ✅ GPU（通过 `copy_gpu_inplace`） |
+| Operation | Implementation Status |
+|-----------|-----------------------|
+| `Slice` | ✅ GPU (dedicated kernel `slice_unary`, all tests passed) |
+| `DynamicSlice` | ✅ GPU (via `copy_gpu_inplace`) |
+| `SliceUpdate` | ✅ GPU (dedicated kernel `slice_update_unary`, with row-contiguous check) |
+| `DynamicSliceUpdate` | ✅ GPU (dedicated kernel `slice_update_unary`) |
+| `Concatenate` | ✅ GPU (via `copy_gpu_inplace`) |
 
 2026.6.17
 

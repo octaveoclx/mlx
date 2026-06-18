@@ -1,5 +1,19 @@
 # Progress
 
+2026.6.19
+
+### Matrix Multiplication (`matmul`)
+- **Primary accelerator:** [CLBlast](https://github.com/CNugteren/CLBlast) – an optimized OpenCL BLAS library
+- **Supported data types:**
+  - `float32` – fully accelerated (single and batched GEMM)
+  - `float64` – attempted if device supports double precision (otherwise CPU fallback)
+  - `float16` – attempted via CLBlast’s `Hgemm`; falls back to CPU if not available
+  - `complex64` – support included CGEMM
+- **Features:**
+  - Batched matrix multiplication (3D+ tensors) via strided batched GEMM
+  - Automatic handling of non‑contiguous inputs/outputs (via staging)
+  - Transparent fallback to CPU if CLBlast is unavailable or fails
+
 2026.6.18
 
 ## ✅ Scatter Operations Implemented

@@ -1,5 +1,25 @@
 # Progress
 
+2026.6.18
+
+## 形状与视图操作 (Shape & View Operations)
+
+| 函数 | 实现状态 |
+|------|----------|
+| `Reshape`, `Flatten`, `Unflatten`, `ExpandDims`, `Squeeze`, `BroadcastAxes` | ✅ GPU（零拷贝共享缓冲区） |
+| `Transpose` | ✅ GPU（零拷贝） |
+| `View` | ✅ GPU（共享缓冲区或 CPU 回退） |
+
+## 切片与拼接 (Slicing & Concatenation)
+
+| 函数 | 实现状态 |
+|------|----------|
+| `Slice` | ✅ GPU（独立内核 `slice_unary`，已通过所有测试） |
+| `DynamicSlice` | ✅ GPU（通过 `copy_gpu_inplace`） |
+| `SliceUpdate` | ✅ GPU（独立内核 `slice_update_unary`，行连续检查） |
+| `DynamicSliceUpdate` | ✅ GPU（独立内核 `slice_update_unary`） |
+| `Concatenate` | ✅ GPU（通过 `copy_gpu_inplace`） |
+
 2026.6.17
 
 # MLX OpenCL Backend — Unary Operations Status

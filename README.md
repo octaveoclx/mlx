@@ -1,5 +1,8 @@
 # Progress
+2026.6.20
 
+- Wasted time on connecting (AnyMagma)[https://github.com/octaveoclx/AnyMagma] (clMagma) in using matrix inversion. Then realized it has problem with inversion on small matrix.
+ 
 2026.6.19
 
 ### Matrix Multiplication (`matmul`)

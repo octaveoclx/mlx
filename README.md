@@ -1,8 +1,12 @@
 # Progress
+
+2026.6.21
+- 1D FFT single dim/axis support via [VkFFT] (https://github.com/DTolm/VkFFT).
+
 2026.6.20
 
 - Wasted time on connecting [AnyMagma](https://github.com/octaveoclx/AnyMagma) (clMagma) in using matrix inversion. Then realized it has problem with inversion on small matrix.
- 
+ The way to use it is to use underlayered functions instead of [getri] (https://github.com/octaveoclx/AnyMagma#warning).
 2026.6.19
 
 ### Matrix Multiplication (`matmul`)

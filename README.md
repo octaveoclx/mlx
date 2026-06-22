@@ -7,6 +7,8 @@
 
 - Wasted time on connecting [AnyMagma](https://github.com/octaveoclx/AnyMagma) (clMagma) in using matrix inversion. Then realized it has problem with inversion on small matrix.
  The way to use it is to use underlayered functions instead of [getri] (https://github.com/octaveoclx/AnyMagma#warning).
+As of 6.22, this clmagma problem has been fixed with update in AnyMagma. 
+
 2026.6.19
 
 ### Matrix Multiplication (`matmul`)

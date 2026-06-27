@@ -1,5 +1,10 @@
 # Progress
 
+
+2026.6.27
+- Distributed send & recv via [pocl](https://github.com/pocl/pocl).
+- Huge time ticks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to make inverse as well as LU decomposition ready for mlx-opencl.
+
 2026.6.21
 - 1D FFT single dim/axis support via [VkFFT] (https://github.com/DTolm/VkFFT).
 

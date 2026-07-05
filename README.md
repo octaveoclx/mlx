@@ -3,6 +3,23 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+2026.7.6
+# Convolution Tests
+
+The test suite verifies the correctness of convolution operations on both CPU and GPU backends. The following parameters are covered:
+
+- **Symmetric padding** (per spatial dimension)
+- **Stride** (1D, 2D, and 3D with various values)
+- **Dilation** (kernel dilation)
+- **Flip** (convolution with flipped kernel)
+- **Groups** (grouped convolution)
+- **Edge cases** (kernel larger than input, zero-size output)
+
+Each test generates random input and weight tensors, computes the convolution on CPU (reference) and GPU (OpenCL), and compares the results with a tolerance. All tests passed on the tested hardware.
+
+Additionally, performance benchmarks are provided separately to measure speedups.
+
+
 2026.7.5
 - Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to pass all single card tests.
 - Implemeted Scan (Prefix Sum) Primitives.

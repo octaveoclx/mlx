@@ -1,15 +1,11 @@
-# Progress
-
-
-2026.7.5
-- Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to pass all single card tests.
-- Implemeted Scan (Prefix Sum) Primitives.
-```markdown
 # MLX OpenCL Backend – Progress & Features
 
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+2026.7.5
+- Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to pass all single card tests.
+- Implemeted Scan (Prefix Sum) Primitives.
 
 ## ✅ Latest Milestone: Scan (Prefix Sum) Primitives – All Tests Pass
 

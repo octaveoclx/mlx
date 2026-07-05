@@ -1,6 +1,10 @@
 # Progress
 
 
+2026.7.5
+- Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to pass all single card tests.
+
+
 2026.6.27
 - Distributed send & recv via [pocl](https://github.com/pocl/pocl), and tested on two machines for P2P copy via pocl-remote.
 - Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to make inverse as well as LU decomposition ready for mlx-opencl.

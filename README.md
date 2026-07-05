@@ -3,26 +3,30 @@
 
 2026.7.5
 - Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to pass all single card tests.
-# OpenCL Backend: Scan (Prefix Sum) Primitives – Test Summary
+- Implemeted Scan (Prefix Sum) Primitives.
+```markdown
+# MLX OpenCL Backend – Progress & Features
 
-The OpenCL backend for MLX now fully supports **prefix scan (cumulative reduction)** operations, covering a wide range of shapes, data types, and execution modes. The complete test suite has been validated against the CPU reference implementation, confirming both **correctness** and **performance** across many workloads.
+This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
 
-## ✅ Operations Supported
+## ✅ Latest Milestone: Scan (Prefix Sum) Primitives – All Tests Pass
 
-| Operation        | Variants                                     |
-|------------------|----------------------------------------------|
-| **Cumulative Sum**   | inclusive, exclusive, forward, reverse   |
-| **Cumulative Product** | inclusive, exclusive, forward, reverse |
-| **Cumulative Maximum** | forward                                 |
-| **Cumulative Minimum** | forward                                 |
+The OpenCL backend now fully supports **prefix scan (cumulative reduction)** operations. The complete test suite has been validated against the CPU reference implementation, confirming both **correctness** and **performance** across many workloads.
+
+### Operations Supported
+
+| Operation              | Variants                                     |
+|------------------------|----------------------------------------------|
+| **Cumulative Sum**     | inclusive, exclusive, forward, reverse      |
+| **Cumulative Product** | inclusive, exclusive, forward, reverse      |
+| **Cumulative Maximum** | forward                                      |
+| **Cumulative Minimum** | forward                                      |
 
 All operations are accelerated on the OpenCL device (GPU) and produce bit‑exact results compared to the CPU fallback.
 
----
-
-## 📊 Test Coverage
+### Test Coverage
 
 - **1D Tensors**  
   - Small arrays (10 elements) – verify basic per‑workgroup logic.  
@@ -39,286 +43,198 @@ All operations are accelerated on the OpenCL device (GPU) and produce bit‑exac
 - **Edge Cases**  
   - Empty arrays (zero‑size tensors) are handled cleanly without crashes or errors.
 
----
-
-## 🧪 Validation Strategy
+### Validation Strategy
 
 - **Reference**: All GPU outputs are compared against the CPU implementation of the same primitive using a tolerance of `1e‑5` for floating‑point types.  
 - **Reproducibility**: Random input data is generated with a fixed seed, ensuring deterministic results.  
-- **Performance**: The large‑array tests confirm that the kernel correctly decomposes work across multiple work‑groups when the scan dimension exceeds a single work‑group’s capacity.
+- **Performance**: Large‑array tests confirm that the kernel correctly decomposes work across multiple work‑groups when the scan dimension exceeds a single work‑group’s capacity.
 
----
-
-## 🚀 Practical Applications
+### Practical Applications
 
 These scan primitives are essential building blocks for:
 
-- **Prefix sums** in attention mechanisms and cumulative loss calculations.  
-- **Cumulative products** in normalization layers (e.g., layer normalization, RMSNorm).  
-- **Cumulative min/max** for gradient clipping, boundary checks, or running statistics.  
-- **Parallel prefix algorithms** used in sorting, stream compaction, and more.
+- Prefix sums in attention mechanisms and cumulative loss calculations.  
+- Cumulative products in normalization layers (e.g., layer normalization, RMSNorm).  
+- Cumulative min/max for gradient clipping, boundary checks, or running statistics.  
+- Parallel prefix algorithms used in sorting, stream compaction, and more.
+
+**Status:** ✅ All tests PASS.
 
 ---
 
-## ✅ Status
+## 📅 Detailed Progress Log (Reverse Chronological)
 
-All tests **PASS**. The OpenCL backend now provides a robust and efficient implementation of prefix scan operations, ready for use in production‑grade ML workflows.
+### 2026-06-27
+- **Distributed send & recv** via [PoCL](https://github.com/pocl/pocl), tested on two machines for P2P copy using pocl‑remote.
+- Fixed old clMAGMA problems (via [AnyMagma](https://github.com/octaveoclx/AnyMagma)) to make inverse and LU decomposition ready for MLX‑OpenCL.
 
+### 2026-06-21
+- **1D FFT** single‑dimension/axis support via [VkFFT](https://github.com/DTolm/VkFFT).
 
-2026.6.27
-- Distributed send & recv via [pocl](https://github.com/pocl/pocl), and tested on two machines for P2P copy via pocl-remote.
-- Huge no. of time tick-tocks have been spent on fixing old clMagma problems offering on [AnyMagma](https://github.com/octaveoclx/AnyMagma) to make inverse as well as LU decomposition ready for mlx-opencl.
+### 2026-06-20
+- Integrated [AnyMagma](https://github.com/octaveoclx/AnyMagma) (clMAGMA) for matrix inversion.  
+  Initially encountered issues with small‑matrix inversion; resolved by using underlayered functions instead of `getri`.  
+  As of 6.22, this clMAGMA problem has been fixed with an update in AnyMagma.
 
-2026.6.21
-- 1D FFT single dim/axis support via [VkFFT] (https://github.com/DTolm/VkFFT).
-
-2026.6.20
-
-- Wasted time on connecting [AnyMagma](https://github.com/octaveoclx/AnyMagma) (clMagma) in using matrix inversion. Then realized it has problem with inversion on small matrix.
- The way to use it is to use underlayered functions instead of [getri] (https://github.com/octaveoclx/AnyMagma#warning).
-As of 6.22, this clmagma problem has been fixed with update in AnyMagma. 
-
-2026.6.19
-
-### Matrix Multiplication (`matmul`)
-- **Primary accelerator:** [CLBlast](https://github.com/CNugteren/CLBlast) – an optimized OpenCL BLAS library
+### 2026-06-19 – Matrix Multiplication (`matmul`)
+- **Primary accelerator:** [CLBlast](https://github.com/CNugteren/CLBlast) – an optimized OpenCL BLAS library.
 - **Supported data types:**
-  - `float32` – fully accelerated (single and batched GEMM)
-  - `float64` – attempted if device supports double precision (otherwise CPU fallback)
-  - `float16` – attempted via CLBlast’s `Hgemm`; falls back to CPU if not available
-  - `complex64` – support included CGEMM
+  - `float32` – fully accelerated (single and batched GEMM).
+  - `float64` – attempted if device supports double precision (otherwise CPU fallback).
+  - `float16` – attempted via CLBlast’s `Hgemm`; falls back to CPU if not available.
+  - `complex64` – support included CGEMM.
 - **Features:**
-  - Batched matrix multiplication (3D+ tensors) via strided batched GEMM
-  - Automatic handling of non‑contiguous inputs/outputs (via staging)
-  - Transparent fallback to CPU if CLBlast is unavailable or fails
+  - Batched matrix multiplication (3D+ tensors) via strided batched GEMM.
+  - Automatic handling of non‑contiguous inputs/outputs (via staging).
+  - Transparent fallback to CPU if CLBlast is unavailable or fails.
 
-2026.6.18
+### 2026-06-18 – Scatter Operations
 
-## ✅ Scatter Operations Implemented
+The following scatter operations are fully implemented and validated:
 
-The following scatter operations have been fully implemented and validated on the OpenCL backend:
+| Operation     | Description                     |
+|---------------|---------------------------------|
+| `scatter`     | Replace (single‑ and multi‑axis) |
+| `scatter_add` | Accumulate by addition          |
+| `scatter_prod`| Accumulate by multiplication    |
+| `scatter_max` | Accumulate by maximum           |
+| `scatter_min` | Accumulate by minimum           |
 
-- **`scatter`** (replace) — both single-axis and multi-axis variants
-- **`scatter_add`**
-- **`scatter_prod`**
-- **`scatter_max`**
-- **`scatter_min`**
+**Key Features:**
+- Index types: `int32` and `int64`.
+- Data types: `float16`, `float32`.
+- Negative axes are automatically normalized.
+- Empty tensors and out‑of‑bounds indices are handled gracefully.
 
-### 📌 Key Features
+All operations are tested with stride‑aware comparison logic, ensuring correctness for both contiguous and non‑contiguous layouts.
 
-- **Index types**: Supports both `int32` and `int64` index arrays
-- **Data types**: Supports `float16` and `float32`
-- **Axis handling**: Supports negative axes (automatically normalized)
-- **Edge cases**: Handles empty tensors and out-of-bounds indices (ignored silently)
-
-All operations have been tested with stride-aware comparison logic, ensuring correctness for both contiguous and non-contiguous array layouts.
-
-## Shape & View Operations
+### Shape & View Operations
 
 | Operation | Implementation Status |
 |-----------|-----------------------|
-| `Reshape`, `Flatten`, `Unflatten`, `ExpandDims`, `Squeeze`, `BroadcastAxes` | ✅ GPU (zero-copy shared buffer) |
-| `Transpose` | ✅ GPU (zero-copy) |
+| `Reshape`, `Flatten`, `Unflatten`, `ExpandDims`, `Squeeze`, `BroadcastAxes` | ✅ GPU (zero‑copy shared buffer) |
+| `Transpose` | ✅ GPU (zero‑copy) |
 | `View` | ✅ GPU (shared buffer or CPU fallback) |
 
-## Slicing & Concatenation
+### Slicing & Concatenation
 
-| Operation | Implementation Status |
-|-----------|-----------------------|
-| `Slice` | ✅ GPU (dedicated kernel `slice_unary`, all tests passed) |
-| `DynamicSlice` | ✅ GPU (via `copy_gpu_inplace`) |
-| `SliceUpdate` | ✅ GPU (dedicated kernel `slice_update_unary`, with row-contiguous check) |
-| `DynamicSliceUpdate` | ✅ GPU (dedicated kernel `slice_update_unary`) |
-| `Concatenate` | ✅ GPU (via `copy_gpu_inplace`) |
+| Operation              | Implementation Status |
+|------------------------|-----------------------|
+| `Slice`                | ✅ GPU (dedicated kernel `slice_unary`, all tests passed) |
+| `DynamicSlice`         | ✅ GPU (via `copy_gpu_inplace`) |
+| `SliceUpdate`          | ✅ GPU (dedicated kernel `slice_update_unary`, with row‑contiguous check) |
+| `DynamicSliceUpdate`   | ✅ GPU (dedicated kernel `slice_update_unary`) |
+| `Concatenate`          | ✅ GPU (via `copy_gpu_inplace`) |
 
-2026.6.17
+### 2026-06-17 – Unary Operations
 
-# MLX OpenCL Backend — Unary Operations Status
+The following unary primitives have dedicated OpenCL kernel implementations and pass all unit tests.
 
-This document summarizes the **unary operations** that are fully implemented and validated on the OpenCL backend, as well as neural network functions that **do not require** separate GPU kernel implementations.
+| Category                  | Operations                                                               |
+|---------------------------|--------------------------------------------------------------------------|
+| **Basic Math**            | `Abs`, `Negative`, `Square`, `Ceil`, `Floor`, `Round`, `Sign`           |
+| **Exponential & Log**     | `Exp`, `Expm1`, `Log`, `Log1p` (supports natural, base‑2, base‑10)      |
+| **Trigonometric**         | `Sin`, `Cos`, `Tan`, `ArcSin`, `ArcCos`, `ArcTan`                       |
+| **Hyperbolic & Inverse**  | `Sinh`, `Cosh`, `Tanh`, `ArcSinh`, `ArcCosh`, `ArcTanh`                 |
+| **Power & Root**          | `Sqrt`, `Rsqrt` (controlled via `recip` parameter)                     |
+| **Special Functions**     | `Erf`, `ErfInv`                                                         |
+| **Logical & Bitwise**     | `LogicalNot`, `BitwiseInvert`                                           |
+| **Complex**               | `Real`, `Imag`, `Conjugate`                                             |
+| **Activation**            | `Sigmoid` (dedicated primitive)                                         |
 
----
+**NN Functions That Do NOT Require Separate Implementation**  
+These are composed from already‑supported basic operations:
 
-## ✅ Implemented Unary Primitives
+- `ReLU` → `maximum(0, x)`
+- `Leaky ReLU` → `maximum(negative_slope * x, x)`
+- `PReLU` → `max(0, x) + a * min(0, x)`
+- `Swish / SiLU` → `x * sigmoid(x)`
+- `GELU` → `0.5 * x * (1 + erf(x / sqrt(2)))`
+- `Softmax` → `exp(x) / sum(exp(x))`
+- `LogSoftmax` → `log(softmax(x))`
+- `ELU`, `SELU` – use `exp`, `where`, and arithmetic.
 
-The following `UnaryPrimitive` classes have dedicated OpenCL kernel implementations and pass all unit tests.
+Since their building blocks are already GPU‑accelerated, these high‑level functions automatically run on the OpenCL backend without extra kernel development.
 
-| Category | Operations | Notes |
-| :--- | :--- | :--- |
-| **Basic Math** | `Abs`, `Negative`, `Square`, `Ceil`, `Floor`, `Round`, `Sign` | |
-| **Exponential & Logarithm** | `Exp`, `Expm1`, `Log`, `Log1p` | `Log` supports natural, base‑2, and base‑10 (via `Log::Base`). |
-| **Trigonometric** | `Sin`, `Cos`, `Tan`, `ArcSin`, `ArcCos`, `ArcTan` | |
-| **Hyperbolic & Inverse** | `Sinh`, `Cosh`, `Tanh`, `ArcSinh`, `ArcCosh`, `ArcTanh` | |
-| **Power & Root** | `Sqrt`, `Rsqrt` | `Sqrt` handles both via `recip` parameter (`false` → sqrt, `true` → rsqrt). |
-| **Special Functions** | `Erf`, `ErfInv` | |
-| **Logical & Bitwise** | `LogicalNot`, `BitwiseInvert` | |
-| **Complex Operations** | `Real`, `Imag`, `Conjugate` | `Real`/`Imag` extract real/imag parts as real arrays; `Conjugate` returns complex conjugate. |
-| **Activation** | `Sigmoid` | Implemented as a dedicated `UnaryPrimitive` (not composed). |
+### 2026-06-16
+- **Copy improvements:**  
+  - `copy_unary` now correctly handles arbitrary strides, enabling proper GPU‑side copies for 3D transposed data.
+- **Transpose** and **Reshape** are now GPU‑accelerated using zero‑copy views (`transpose_in_eval`, `reshape_in_eval`), eliminating segmentation faults.
+- **reshape_gpu** now only uses zero‑copy when the input is row‑contiguous; otherwise forces an explicit copy to produce a truly contiguous output.
 
-All operations above are fully validated on the OpenCL backend.
+### 2026-06-13
+- Added **erfinv** (from Prof. Mike Giles’s code) and **FP64** support.
+- Full set of unary operations now coded.
 
----
+### 2026-06-11
+- **FP16 support in CLBlast** for Apple Silicon and NVIDIA GPUs (with help from an ICD wrapper).
+- **bf16** simulated via float, with promote/demote macros in kernels.
+- Support for **UMA** (Apple Silicon, Intel Xe laptop GPU+CPU) and standard copy‑buffer behavior for discrete GPUs.
 
-## ❌ NN Functions That Do **Not** Require Separate Implementation
+### 2026-06-09
+- Flexible type support using the same kernel differentiated by the `TYPE` macro.
+- Direct binary add and broadcast add working for all supported types.
 
-The following neural network activations and layers are **not** implemented as independent `UnaryPrimitive` primitives. They are composed from already‑supported basic operations (listed above), so **no additional GPU kernels are needed**.
+### 2026-06-08
+- Aligned with [Vulkan backend (2026.3.5)](https://github.com/NripeshN/mlx/commit/09371e55508518caadcc05f1aa2ea3d2225fdcac).  
+  Core GPU kernel dispatch functions (binary, unary, reduce, softmax, scan, etc.) are placeholder implementations; actual OpenCL kernel code is being written.
 
-| Operation | Implementation | Reason (dependencies already implemented) |
-| :--- | :--- | :--- |
-| **ReLU** | `maximum(0, x)` | Uses `maximum` (binary op). |
-| **Leaky ReLU** | `maximum(negative_slope * x, x)` | Uses `maximum`, `multiply`, `add`. |
-| **PReLU** | `max(0, x) + a * min(0, x)` | Uses `maximum`, `minimum`, `multiply`, `add`. |
-| **Swish / SiLU** | `x * sigmoid(x)` | Depends on `sigmoid` (implemented) and `multiply`. |
-| **GELU** | `0.5 * x * (1 + erf(x / sqrt(2)))` | Uses `erf`, `sqrt`, `multiply`, `add`. |
-| **Softmax** | `exp(x) / sum(exp(x))` over axis | Requires `exp` (implemented) and `sum` (reduction). |
-| **LogSoftmax** | `log(softmax(x))` | Same as Softmax plus `log` (implemented). |
-| **ELU** | `x if x > 0 else α*(exp(x)-1)` | Uses `exp`, `where`. |
-| **SELU** | scale * (x if x > 0 else α*(exp(x)-1)) | Similar, uses `exp` and arithmetic. |
-| **Hard sigmoid / Hard swish** | Piecewise linear approximations | Uses comparisons and arithmetic; no transcendental functions. |
-
-**Key point:** All these are high‑level functions in the `nn` module, not `UnaryPrimitive` subclasses. Since their building blocks are already GPU‑accelerated, they automatically run on the OpenCL backend without extra kernel development.
-
----
-
-## 📝 Notes on Missing Primitives
-
-Some mathematical functions that might appear to be “unary” (e.g., `Cbrt`, `Erfc`, `Lgamma`, `Tgamma`, `Trunc`, `Reciprocal`) are **not** present as `UnaryPrimitive` in MLX core. They are either:
-- Not defined as primitives,
-- Provided via CPU fallback, or
-- Composed from other operations (e.g., `Reciprocal` uses `Divide` with broadcast).
-
-Therefore, they are not listed as “missing” — they are outside the scope of `UnaryPrimitive` implementation.
+### 2026-06-07
+- Successfully created and built a basic OpenCL framework aligned with [Vulkan backend (2026.3.4)](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498).
 
 ---
 
-*Last updated: June 2026*
-
-2026.6.16
-
--fix, copy_unary correctly handles arbitrary strides, enabling correct GPU‑side copies for 3D transposed data
-
--Implemented and enabled GPU transpose copy
-
-- enabling GPU‑accelerated copies instead of always falling back to CPU.
-
--Framework support for reduction operations.
-
--Corrected Transpose::eval_gpu and Reshape::eval_gpu
-
-    Replaced naive buffer sharing with proper metadata handling using transpose_in_eval and reshape_in_eval to create zero‑copy views with correct strides and contiguity flags.
-
-    Eliminated segmentation faults caused by mismatched logical/physical layouts.
-
--Improved reshape_gpu
-
-    Added a condition to only use zero‑copy sharing when the input is row‑contiguous and the last stride is 1.
-
-    For non‑contiguous inputs, forced an explicit GPU‑side (or CPU) copy to produce a truly contiguous output, fixing incorrect results in multi‑axis reductions (e.g., sum over axes (0,2) on a 2×2×2 tensor).
-
-2026.6.13
-
-OpenCL conversion of Prof. Mike Giles's work on [erfinv](https://people.maths.ox.ac.uk/gilesm/codes/erfinv/).
-
-Add FP64 support.
-
-Full Unary coded.
-
-2026.6.11
-
-Add support of FP16 in CLBLAST for [Apple Silicon and NVIDIA GPUs](https://github.com/CNugteren/CLBlast/commit/f78f6dd0edd5f24441f61bfade262e8a0684ce70). 
-[Discussion](https://github.com/CNugteren/CLBlast/issues/667) 
-[Discussion2](https://forums.developer.nvidia.com/t/gtx-1660-super-tu116-not-exposing-fp16-on-driver-580-94-16/359199/6])
-
-Add FP16 in the Apple Silicon with help of [ICD warpper](https://github.com/octaveoclx/ocl_icd_wrapper/tree/cl_khr_fp16).
-
-Support direct binary add and broadcast add.
-
-Add promote and demote to kernels to supoort bf16 - float simulation, FP16 - float simulation if does not work, FP32, F64, u/intXX.
-
-UMA enabled with Apple silicon, Intel Xe laptop GPU+CPU, and normal copy buffer behavior for DGPUs.
-
-2026.6.9
-Add flexible type support using the same kernel differentiaing by TYPE macro.
-```bash
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ ./test_add
-OpenCL is available.
-Device name: Intel(R) Iris(R) Xe Graphics
-Default device: gpu
-Before eval, c data type: float32
-eval_binary_opencl_or_cpu called for add
-try_eval_binary_op_opencl called for add
-Result: array([5, 7, 9], dtype=float32)
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$
-g++ -std=c++20 -o test_add_fp16 ../test_add_fp16.cpp -I.. -L. -lmlx -lOpenCL -lopenblas -llapack -lgfortran -lpthread
-./test_add_fp16
-OpenCL device: Intel(R) Iris(R) Xe Graphics
-eval_binary_opencl_or_cpu called for add
-try_eval_binary_op_opencl called for add
-float16 addition result: array([5, 7, 9], dtype=float16)
-Expected: [5, 7, 9], got: [5, 7, 9]
-(base) jc@U1:~/Downloads/mlx-feat-vulkan/build$ 
-```
-
-2026.6.8: align with the work of [vulkan 2026.3.5](https://github.com/NripeshN/mlx/commit/09371e55508518caadcc05f1aa2ea3d2225fdcac). Compared to the Vulkan backend, the OpenCL backend's core GPU kernel dispatch functions (such as binary, unary, reduce, softmax, scan, etc.) are still placeholder implementations that throw exceptions, and no real OpenCL kernel code has been written yet.
-
-2026.6.7: sucessfully create and build a basic OpenCL framework to align with the work of [vulkan 2026.3.4](https://github.com/NripeshN/mlx/commit/d64d1ffb7479cfa46b7cb8525f6a46704ab25498)
-
-
-## Why MLX + OpenCL is a promising direction
+## Why MLX + OpenCL Is a Promising Direction
 
 MLX has significant untapped potential when combined with OpenCL. Here’s why the time is right to start this work.
 
-### 1. MLX’s architecture is naturally suited for OpenCL
-MLX has a clean, layered design with a well-defined backend abstraction (`Primitive::eval_gpu`). Existing Metal and Vulkan backends already demonstrate how to implement compute kernels without heavy runtime dependencies. Adding an OpenCL backend fits directly into this model – reusing the same 100–200 core primitives.
+### 1. MLX’s Architecture Is Naturally Suited for OpenCL
+MLX has a clean, layered design with a well‑defined backend abstraction (`Primitive::eval_gpu`). Existing Metal and Vulkan backends demonstrate how to implement compute kernels without heavy runtime dependencies. Adding an OpenCL backend fits directly into this model – reusing the same 100–200 core primitives.
 
-### 2. A manageable number of primitives makes collaboration feasible
-Unlike PyTorch (which has 2000+ operators), MLX requires only about 100–200 kernel primitives to reach full functionality. This small scale means a small team (or even a dedicated individual) can realistically implement all required GPU kernels for OpenCL, without needing a massive contributor base.
+### 2. A Manageable Number of Primitives Makes Collaboration Feasible
+Unlike PyTorch (which has 2000+ operators), MLX requires only about 100–200 kernel primitives to reach full functionality. This small scale means a small team (or even a dedicated individual) can realistically implement all required GPU kernels for OpenCL.
 
-### 3. PoCL‑remote enables distributed training – like NCCL but open
-[PoCL‑remote](http://portablecl.org/docs/html/remote.html) allows OpenCL devices across a network to appear as local devices. By building a collective communication layer on top (AllReduce, Broadcast, etc.), we can create an **NCCL‑like distributed training framework** that works on any hardware supporting OpenCL. This is especially valuable in the era of big data, where cost‑effective consumer GPUs or accelerators can be interconnected via standard Ethernet – network speed becomes the primary bottleneck, but the approach is still practical for many workloads.
+### 3. PoCL‑Remote Enables Distributed Training – Like NCCL but Open
+[PoCL‑remote](http://portablecl.org/docs/html/remote.html) allows OpenCL devices across a network to appear as local devices. By building a collective communication layer on top (AllReduce, Broadcast, etc.), we can create an **NCCL‑like distributed training framework** that works on any hardware supporting OpenCL. This is especially valuable in the era of big data, where cost‑effective consumer GPUs or accelerators can be interconnected via standard Ethernet.
 
-### 4. Lower the risk and shorten the development curve
+### 4. Lower the Risk and Shorten the Development Curve
 
-The widespread success of CUDA in accelerating machine learning workloads, together with the recent emergence of a Vulkan backend for MLX in just the past few months, provides an important and practical reference for this work. 
+The widespread success of CUDA in accelerating machine learning workloads, together with the recent emergence of a Vulkan backend for MLX in just the past few months, provides an important and practical reference for this work.
 
-clBLAST – Heavily involved in tuning; its optimisations (especially for matrix multiplication) can be adapted for MLX’s core primitives.
+We leverage several mature OpenCL‑based libraries:
 
-vkFFT – Provides an OpenCL interface for FFT; valuable for spectral operations in MLX.
+- **CLBlast** – Optimised BLAS, heavily tuned for matrix multiplication.
+- **vkFFT** – Provides an OpenCL interface for FFT; valuable for spectral operations.
+- **AnySparse** – Our revived version of clSparse, offering efficient sparse solvers.
+- **AnyMagma** – Our revived version of clMAGMA, useful for matrix decompositions and dense linear algebra.
+- **AnyArray** – Derived from Octave’s ocl; serves as our version of a GPU array, similar to MATLAB’s gpuArray.
+- **PoCL** – Experience configuring PoCL for dual devices on Apple Silicon and using PoCL‑remote for cluster setups.
 
-AnySparse – Our revived version of clSparse, offering efficient sparse problem solvers.
+### 5. Why MLX Reduces the Number of Operators – from DeepSeek
 
-AnyMagma – Our revived version of clMAGMA, useful for matrix decompositions and dense linear algebra.
+In traditional frameworks like PyTorch’s ATen, covering various combinations (e.g., the gradient of `sin(cos(x))`, batched `sin`, or a fused `sin+cos+exp` kernel) often requires:
 
-AnyArray – Derived from Octave’s ocl; serves as our version of a GPU array, similar to MATLAB’s gpuArray.
+- Explicitly implementing forward operators: `Sin`, `Cos`, `Mul`, `Exp`, etc.
+- Explicitly implementing backward operators: `SinBackward`, `CosBackward`, `MulBackward`, etc.
+- Explicitly implementing batched versions: `BatchSin`, `BatchCos` (or relying on broadcasting, which often still requires separate optimizations).
+- Manually writing fused kernels like `FusedSinCosExpKernel` and their corresponding backward pass.
 
-PoCL – We have experience configuring PoCL for dual devices on Apple Silicon and using PoCL‑remote for cluster setups.
+MLX, in contrast, implements only the most basic forward kernels (e.g., `sin`, `cos`, `mul`, `exp`) along with their VJP (vector-Jacobian product) rules. Then, through three powerful function transforms:
 
-### 5. Why MLX reduce the number of operators -- from DeepSeek
-
-In traditional frameworks like PyTorch's ATen, covering various combinations (e.g., the gradient of sin(cos(x)), batched sin, or a fused sin+cos+exp kernel) often requires:
-
-Explicitly implementing forward operators: Sin, Cos, Mul, Exp, etc.
-
-Explicitly implementing backward operators: SinBackward, CosBackward, MulBackward, etc.
-
-Explicitly implementing batched versions: BatchSin, BatchCos (or relying on broadcasting, which often still requires separate optimizations).
-
-Manually writing fused kernels like FusedSinCosExpKernel and their corresponding backward pass.
-
-MLX, in contrast, implements only the most basic forward kernels (e.g., sin, cos, mul, exp) along with their VJP (vector-Jacobian product) rules. Then, through three powerful function transforms:
-
-grad → automatically generates the reverse pass for any arbitrarily complex function.
-
-vmap → automatically generates batched versions.
-
-compile → automatically generates fused kernels.
+- `grad` → automatically generates the reverse pass for any arbitrarily complex function.
+- `vmap` → automatically generates batched versions.
+- `compile` → automatically generates fused kernels.
 
 The synergy of these three transforms allows MLX to cover the same functional space that would require hundreds or even thousands of operators in frameworks like PyTorch, using only a few dozen basic primitives.
 
 ### Summary
+
 - ✅ MLX’s simple backend interface lowers the porting effort.
 - ✅ A small set of primitives keeps the task tractable.
 - ✅ PoCL‑remote offers a path to open, multi‑vendor distributed training.
+
+This work brings MLX one step closer to becoming a truly portable, high‑performance machine learning framework, ready to run on a wide variety of hardware from laptops to multi‑node clusters.
+```
 
 If you are interested in contributing to an OpenCL backend for MLX, let’s connect!
 

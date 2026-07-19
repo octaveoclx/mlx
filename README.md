@@ -3,6 +3,11 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+2026.7.20
+82% tests passed, 42 tests failed out of 239
+
+Total Test time (real) =  79.48 sec
+
 The following tests FAILED:
 
 96 - test fftshift and ifftshift (Failed)  

@@ -4,6 +4,7 @@ This document summarizes the current state of the MLX OpenCL backend, highlighti
 
 ---
 2026.7.20
+
 82% tests passed, 42 tests failed out of 239
 
 Total Test time (real) =  79.48 sec

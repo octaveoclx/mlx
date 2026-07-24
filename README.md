@@ -5,11 +5,12 @@ This document summarizes the current state of the MLX OpenCL backend, highlighti
 ---
 2026.7.24
 
-96% tests passed, 8 tests failed out of 224
+  96% tests passed, 8 tests failed out of 224
 
-Total Test time (real) =  72.42 sec
+  Total Test time (real) =  72.42 sec
 
-The following tests FAILED:
+  The following tests FAILED:
+
 	172 - test conv1d (SEGFAULT)
 	180 - test conv_transpose2d with output_padding (Failed)
 	181 - test conv_transpose3d with output_padding (Failed)

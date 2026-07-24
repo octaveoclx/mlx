@@ -3,6 +3,23 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+2026.7.24
+
+96% tests passed, 8 tests failed out of 224
+
+Total Test time (real) =  72.42 sec
+
+The following tests FAILED:
+	172 - test conv1d (SEGFAULT)
+	180 - test conv_transpose2d with output_padding (Failed)
+	181 - test conv_transpose3d with output_padding (Failed)
+	182 - test fp8 conversion (Failed)
+	194 - test categorical (SEGFAULT)
+	198 - test access stream in other thread (Failed)
+	223 - tests (SEGFAULT)
+	224 - teardown (Not Run)
+
+
 2026.7.20
 
 82% tests passed, 42 tests failed out of 239

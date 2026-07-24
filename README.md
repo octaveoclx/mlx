@@ -3,6 +3,22 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+2026.7.25
+
+99% tests passed, 1 tests failed out of 222
+
+Total Test time (real) = 113.21 sec
+
+The following tests FAILED:
+
+	222 - teardown (Not Run)
+
+So parity tests are almost done, except for: 
+
+    some fallbacks on strange cases of scattering and fp8 conversion
+	linear algebra related to AnyMagma (shouldn't be a problem for all have been done with fixing CLMagma)
+	
+	
 2026.7.24
 
   96% tests passed, 8 tests failed out of 224

@@ -3,6 +3,15 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+2026.7.26
+
+One case in：
+        Start 132: test scatter types
+    132/222 Test #132: test scatter types ..................................................***Failed    0.09 sec
+
+Linear algebra related to AnyMagma
+
+---
 2026.7.25
 
 99% tests passed, 1 tests failed out of 222

@@ -3,6 +3,554 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 
 ---
+28 July 2026
+
+(base) jc@U1:~/Downloads/vdss/mlx-opencwl/mlx-opencl726/mlx-opencl/build/tests$ make test -j16
+
+Running tests...
+
+	        Start   1: test simple allocations
+	  1/267 Test   #1: test simple allocations .............................................   Passed    0.09 sec
+	        Start   2: test large allocations
+	  2/267 Test   #2: test large allocations ..............................................   Passed    0.32 sec
+	        Start   3: test cached allocation keeps capacity
+	  3/267 Test   #3: test cached allocation keeps capacity ...............................   Passed    0.12 sec
+	        Start   4: test clear cache synchronizes cpu streams
+	  4/267 Test   #4: test clear cache synchronizes cpu streams ...........................   Passed    0.13 sec
+	        Start   5: test arg reduce small
+	  5/267 Test   #5: test arg reduce small ...............................................   Passed    0.13 sec
+	        Start   6: test arg reduce against cpu
+	  6/267 Test   #6: test arg reduce against cpu .........................................   Passed    0.12 sec
+	        Start   7: test arg reduce bool
+	  7/267 Test   #7: test arg reduce bool ................................................   Passed    0.12 sec
+	        Start   8: test arg reduce edge cases
+	  8/267 Test   #8: test arg reduce edge cases ..........................................   Passed    0.13 sec
+	        Start   9: test arg reduce irregular strides
+	  9/267 Test   #9: test arg reduce irregular strides ...................................   Passed    0.12 sec
+	        Start  10: test array basics
+	 10/267 Test  #10: test array basics ...................................................   Passed    0.13 sec
+	        Start  11: test array types
+	 11/267 Test  #11: test array types ....................................................   Passed    0.13 sec
+	        Start  12: test array metadata
+	 12/267 Test  #12: test array metadata .................................................   Passed    0.09 sec
+	        Start  13: test array iteration
+	 13/267 Test  #13: test array iteration ................................................   Passed    0.13 sec
+	        Start  14: test array shared buffer
+	 14/267 Test  #14: test array shared buffer ............................................   Passed    0.12 sec
+	        Start  15: test make empty array
+	 15/267 Test  #15: test make empty array ...............................................   Passed    0.12 sec
+	        Start  16: test make array from user buffer
+	 16/267 Test  #16: test make array from user buffer ....................................   Passed    0.13 sec
+	        Start  17: test negative indexing for shape/strides
+	 17/267 Test  #17: test negative indexing for shape/strides ............................   Passed    0.07 sec
+	        Start  18: test siblings circular references without eval
+	 18/267 Test  #18: test siblings circular references without eval ......................   Passed    0.07 sec
+	        Start  19: test stop gradient
+	 19/267 Test  #19: test stop gradient ..................................................   Passed    0.18 sec
+	        Start  20: test jvp
+	 20/267 Test  #20: test jvp ............................................................   Passed    0.15 sec
+	        Start  21: test vjp
+	 21/267 Test  #21: test vjp ............................................................   Passed    0.16 sec
+	        Start  22: test grad
+	 22/267 Test  #22: test grad ...........................................................   Passed    0.15 sec
+	        Start  23: test transform container reuse does not accumulate stale wrappers
+	 23/267 Test  #23: test transform container reuse does not accumulate stale wrappers ...   Passed    0.15 sec
+	        Start  24: test creation grads
+	 24/267 Test  #24: test creation grads .................................................   Passed    0.16 sec
+	        Start  25: test op vjps
+	 25/267 Test  #25: test op vjps ........................................................   Passed    5.07 sec
+	        Start  26: test gather and take grads
+	 26/267 Test  #26: test gather and take grads ..........................................   Passed    2.69 sec
+	        Start  27: test slice grads
+	 27/267 Test  #27: test slice grads ....................................................   Passed    1.00 sec
+	        Start  28: test min and max vjp
+	 28/267 Test  #28: test min and max vjp ................................................   Passed    0.16 sec
+	        Start  29: test reshape and transpose grads
+	 29/267 Test  #29: test reshape and transpose grads ....................................   Passed    0.15 sec
+	        Start  30: test copy grads
+	 30/267 Test  #30: test copy grads .....................................................   Passed    0.13 sec
+	        Start  31: test matmul vjp
+	 31/267 Test  #31: test matmul vjp .....................................................   Passed    0.18 sec
+	        Start  32: test concatenate grads
+	 32/267 Test  #32: test concatenate grads ..............................................   Passed    0.14 sec
+	        Start  33: test split grads
+	 33/267 Test  #33: test split grads ....................................................   Passed    0.13 sec
+	        Start  34: test comparison grads
+	 34/267 Test  #34: test comparison grads ...............................................   Passed    0.15 sec
+	        Start  35: test as_strided grads
+	 35/267 Test  #35: test as_strided grads ...............................................   Passed    0.21 sec
+	        Start  36: test jvp from vjp
+	 36/267 Test  #36: test jvp from vjp ...................................................   Passed    5.35 sec
+	        Start  37: test complex gradients
+	 37/267 Test  #37: test complex gradients ..............................................   Passed    0.99 sec
+	        Start  38: test scan grads
+	 38/267 Test  #38: test scan grads .....................................................   Passed    0.28 sec
+	        Start  39: test update state
+	 39/267 Test  #39: test update state ...................................................   Passed    0.14 sec
+	        Start  40: test grad types
+	 40/267 Test  #40: test grad types .....................................................   Passed    0.07 sec
+	        Start  41: test grad dynamic slices
+	 41/267 Test  #41: test grad dynamic slices ............................................   Passed    0.18 sec
+	        Start  42: test masked_scatter autograd
+	 42/267 Test  #42: test masked_scatter autograd ........................................   Passed    0.15 sec
+	        Start  43: test matmul
+	 43/267 Test  #43: test matmul .........................................................   Passed    0.34 sec
+	        Start  44: test simple compile
+	 44/267 Test  #44: test simple compile .................................................   Passed    0.19 sec
+	        Start  45: test compile with grad
+	 45/267 Test  #45: test compile with grad ..............................................   Passed    0.20 sec
+	        Start  46: test compile inputs with primitive
+	 46/267 Test  #46: test compile inputs with primitive ..................................   Passed    2.00 sec
+	        Start  47: test compile with created array
+	 47/267 Test  #47: test compile with created array .....................................   Passed    0.14 sec
+	        Start  48: test nested compile
+	 48/267 Test  #48: test nested compile .................................................   Passed    0.12 sec
+	        Start  49: test enable and disable compile
+	 49/267 Test  #49: test enable and disable compile .....................................   Passed    0.09 sec
+	        Start  50: test compile with non-finite constants
+	 50/267 Test  #50: test compile with non-finite constants ..............................   Passed    0.13 sec
+	        Start  51: test simplify scalars
+	 51/267 Test  #51: test simplify scalars ...............................................   Passed    0.10 sec
+	        Start  52: test simplify
+	 52/267 Test  #52: test simplify .......................................................   Passed    0.07 sec
+	        Start  53: test simplify noops
+	 53/267 Test  #53: test simplify noops .................................................   Passed    0.12 sec
+	        Start  54: test no simplify
+	 54/267 Test  #54: test no simplify ....................................................   Passed    0.13 sec
+	        Start  55: test simplify multi output
+	 55/267 Test  #55: test simplify multi output ..........................................   Passed    0.14 sec
+	        Start  56: test compile unary fused
+	 56/267 Test  #56: test compile unary fused ............................................   Passed    0.15 sec
+	        Start  57: test compile binary fused
+	 57/267 Test  #57: test compile binary fused ...........................................   Passed    0.15 sec
+	        Start  58: test compile gelu
+	 58/267 Test  #58: test compile gelu ...................................................   Passed    0.20 sec
+	        Start  59: test compile tape with outside parents
+	 59/267 Test  #59: test compile tape with outside parents ..............................   Passed    0.20 sec
+	        Start  60: test compile across streams
+	 60/267 Test  #60: test compile across streams .........................................   Passed    0.13 sec
+	        Start  61: test compile internal output
+	 61/267 Test  #61: test compile internal output ........................................   Passed    0.12 sec
+	        Start  62: test compile deep graph
+	 62/267 Test  #62: test compile deep graph .............................................   Passed    0.17 sec
+	        Start  63: test compile repeat input
+	 63/267 Test  #63: test compile repeat input ...........................................   Passed    0.16 sec
+	        Start  64: test compile compiled function
+	 64/267 Test  #64: test compile compiled function ......................................   Passed    0.13 sec
+	        Start  65: test transform compiled function
+	 65/267 Test  #65: test transform compiled function ....................................   Passed    0.12 sec
+	        Start  66: test fusion kernel reuse
+	 66/267 Test  #66: test fusion kernel reuse ............................................   Passed    0.16 sec
+	        Start  67: test fusion types
+	 67/267 Test  #67: test fusion types ...................................................   Passed    0.14 sec
+	        Start  68: test shapeless compile
+	 68/267 Test  #68: test shapeless compile ..............................................   Passed    0.10 sec
+	        Start  69: test compile strides
+	 69/267 Test  #69: test compile strides ................................................   Passed    0.14 sec
+	        Start  70: test compile change streams
+	 70/267 Test  #70: test compile change streams .........................................   Passed    0.13 sec
+	        Start  71: test compile lambda
+	 71/267 Test  #71: test compile lambda .................................................   Passed    0.13 sec
+	        Start  72: test compile with no-ops
+	 72/267 Test  #72: test compile with no-ops ............................................   Passed    0.11 sec
+	        Start  73: test compile random bits
+	 73/267 Test  #73: test compile random bits ............................................   Passed    0.16 sec
+	        Start  74: test compile throwing first trace does not poison cache
+	 74/267 Test  #74: test compile throwing first trace does not poison cache .............   Passed    0.12 sec
+	        Start  75: test arange
+	 75/267 Test  #75: test arange .........................................................   Passed    0.13 sec
+	        Start  76: test astype
+	 76/267 Test  #76: test astype .........................................................   Passed    0.13 sec
+	        Start  77: test full
+	 77/267 Test  #77: test full ...........................................................   Passed    0.15 sec
+	        Start  78: test simple custom vjp
+	 78/267 Test  #78: test simple custom vjp ..............................................   Passed    0.13 sec
+	        Start  79: test checkpointing
+	 79/267 Test  #79: test checkpointing ..................................................   Passed    0.59 sec
+	        Start  80: test device placement
+	 80/267 Test  #80: test device placement ...............................................   Passed    0.12 sec
+	        Start  81: test einsum path
+	 81/267 Test  #81: test einsum path ....................................................   Passed    0.08 sec
+	        Start  82: test einsum
+	 82/267 Test  #82: test einsum .........................................................   Passed    0.21 sec
+	        Start  83: test eval
+	 83/267 Test  #83: test eval ...........................................................   Passed    0.14 sec
+	        Start  84: test eval multiple
+	 84/267 Test  #84: test eval multiple ..................................................   Passed    0.17 sec
+	        Start  85: test eval with tracer when not tracing
+	 85/267 Test  #85: test eval with tracer when not tracing ..............................   Passed    0.14 sec
+	        Start  86: test eval graph retention when not tracing
+	 86/267 Test  #86: test eval graph retention when not tracing ..........................   Passed    0.13 sec
+	        Start  87: test export basic functions
+	 87/267 Test  #87: test export basic functions .........................................   Passed    0.15 sec
+	        Start  88: test export function with no inputs
+	 88/267 Test  #88: test export function with no inputs .................................   Passed    0.11 sec
+	        Start  89: test export multi output primitives
+	 89/267 Test  #89: test export multi output primitives .................................   Passed    0.16 sec
+	        Start  90: test export primitives with state
+	 90/267 Test  #90: test export primitives with state ...................................   Passed    0.13 sec
+	        Start  91: test export functions with kwargs
+	 91/267 Test  #91: test export functions with kwargs ...................................   Passed    0.13 sec
+	        Start  92: test export function with variable inputs
+	 92/267 Test  #92: test export function with variable inputs ...........................   Passed    0.16 sec
+	        Start  93: test export function on different stream
+	 93/267 Test  #93: test export function on different stream ............................   Passed    0.12 sec
+	        Start  94: test fft basics
+	 94/267 Test  #94: test fft basics .....................................................   Passed    0.21 sec
+	        Start  95: test real ffts
+	 95/267 Test  #95: test real ffts ......................................................   Passed    0.14 sec
+	        Start  96: test fftn
+	 96/267 Test  #96: test fftn ...........................................................   Passed    0.18 sec
+	        Start  97: test fft with provided shape
+	 97/267 Test  #97: test fft with provided shape ........................................   Passed    0.13 sec
+	        Start  98: test fft vmap
+	 98/267 Test  #98: test fft vmap .......................................................   Passed    0.15 sec
+	        Start  99: test fft grads
+	 99/267 Test  #99: test fft grads ......................................................   Passed    0.20 sec
+	        Start 100: test fftshift and ifftshift
+	100/267 Test #100: test fftshift and ifftshift .........................................   Passed    0.15 sec
+	        Start 101: test gpu arange
+	101/267 Test #101: test gpu arange .....................................................   Passed    0.12 sec
+	        Start 102: test gpu full
+	102/267 Test #102: test gpu full .......................................................   Passed    0.15 sec
+	        Start 103: test gpu astype
+	103/267 Test #103: test gpu astype .....................................................   Passed    0.14 sec
+	        Start 104: test gpu reshape
+	104/267 Test #104: test gpu reshape ....................................................   Passed    0.14 sec
+	        Start 105: test gpu reduce
+	105/267 Test #105: test gpu reduce .....................................................   Passed    0.15 sec
+	        Start 106: test gpu reduce with axes
+	106/267 Test #106: test gpu reduce with axes ...........................................   Passed    0.14 sec
+	        Start 107: test gpu binary ops
+	107/267 Test #107: test gpu binary ops .................................................   Passed    0.18 sec
+	        Start 108: test gpu unary ops
+	108/267 Test #108: test gpu unary ops ..................................................   Passed    0.13 sec
+	        Start 109: test gpu random
+	109/267 Test #109: test gpu random .....................................................   Passed    0.13 sec
+	        Start 110: test gpu matmul
+	110/267 Test #110: test gpu matmul .....................................................   Passed    0.14 sec
+	        Start 111: test gpu validation
+	111/267 Test #111: test gpu validation .................................................   Passed    0.13 sec
+	        Start 112: test gpu int32 shape overflow errors
+	112/267 Test #112: test gpu int32 shape overflow errors ................................   Passed    0.07 sec
+	        Start 113: test memory info
+	113/267 Test #113: test memory info ....................................................   Passed    0.10 sec
+	        Start 114: test scatter_prod with NaN does not hang
+	114/267 Test #114: test scatter_prod with NaN does not hang ............................   Passed    0.10 sec
+	        Start 115: test gpu depthwise conv2d non-mod-8 spatial
+	115/267 Test #115: test gpu depthwise conv2d non-mod-8 spatial .........................   Passed    0.26 sec
+	        Start 116: test layer norm vjp bias grad race
+	116/267 Test #116: test layer norm vjp bias grad race ..................................   Passed    3.95 sec
+	        Start 117: test fast rms norm gpu
+	117/267 Test #117: test fast rms norm gpu ..............................................   Passed    0.60 sec
+	        Start 118: test fast rope gpu
+	118/267 Test #118: test fast rope gpu ..................................................   Passed    0.34 sec
+	        Start 119: test fast sdpa gpu
+	119/267 Test #119: test fast sdpa gpu ..................................................   Passed    0.78 sec
+	        Start 120: [mlx.core.linalg.norm] no ord
+	120/267 Test #120: [mlx.core.linalg.norm] no ord .......................................   Passed    0.38 sec
+	        Start 121: [mlx.core.linalg.norm] double ord
+	121/267 Test #121: [mlx.core.linalg.norm] double ord ...................................   Passed    0.73 sec
+	        Start 122: [mlx.core.linalg.norm] string ord
+	122/267 Test #122: [mlx.core.linalg.norm] string ord ...................................   Passed    1.90 sec
+	        Start 123: test QR factorization
+	123/267 Test #123: test QR factorization ...............................................   Passed    0.12 sec
+	        Start 124: test SVD factorization
+	124/267 Test #124: test SVD factorization ..............................................   Passed    0.80 sec
+	        Start 125: test matrix inversion
+	125/267 Test #125: test matrix inversion ...............................................   Passed    0.36 sec
+	        Start 126: test matrix cholesky
+	126/267 Test #126: test matrix cholesky ................................................   Passed    0.33 sec
+	        Start 127: test matrix pseudo-inverse
+	127/267 Test #127: test matrix pseudo-inverse ..........................................   Passed    0.61 sec
+	        Start 128: test cross product
+	128/267 Test #128: test cross product ..................................................   Passed    0.15 sec
+	        Start 129: test matrix eigh
+	129/267 Test #129: test matrix eigh ....................................................   Passed    0.15 sec
+	        Start 130: test lu
+	130/267 Test #130: test lu .............................................................   Passed    0.80 sec
+	        Start 131: test solve
+	131/267 Test #131: test solve ..........................................................   Passed    0.16 sec
+	        Start 132: test solve_triangluar
+	132/267 Test #132: test solve_triangluar ...............................................   Passed    0.08 sec
+	        Start 133: test det
+	133/267 Test #133: test det ............................................................   Passed    0.11 sec
+	        Start 134: test slogdet
+	134/267 Test #134: test slogdet ........................................................   Passed    0.07 sec
+	        Start 135: test save_safetensors
+	135/267 Test #135: test save_safetensors ...............................................   Passed    0.12 sec
+	        Start 136: test safetensors file boundary validation
+	136/267 Test #136: test safetensors file boundary validation ...........................   Passed    0.09 sec
+	        Start 137: test gguf
+	137/267 Test #137: test gguf ...........................................................   Passed    0.15 sec
+	        Start 138: test gguf metadata
+	138/267 Test #138: test gguf metadata ..................................................   Passed    0.10 sec
+	        Start 139: test single array serialization
+	139/267 Test #139: test single array serialization .....................................   Passed    0.77 sec
+	        Start 140: test copy
+	140/267 Test #140: test copy ...........................................................   Passed    0.06 sec
+	        Start 141: test reshape
+	141/267 Test #141: test reshape ........................................................   Passed    0.09 sec
+	        Start 142: test flatten
+	142/267 Test #142: test flatten ........................................................   Passed    0.08 sec
+	        Start 143: test unflatten
+	143/267 Test #143: test unflatten ......................................................   Passed    0.08 sec
+	        Start 144: test squeeze and expand
+	144/267 Test #144: test squeeze and expand .............................................   Passed    0.10 sec
+	        Start 145: test slice
+	145/267 Test #145: test slice ..........................................................   Passed    0.10 sec
+	        Start 146: test slice update
+	146/267 Test #146: test slice update ...................................................   Passed    0.11 sec
+	        Start 147: test slice update add
+	147/267 Test #147: test slice update add ...............................................   Passed    0.11 sec
+	        Start 148: test dynamic slice
+	148/267 Test #148: test dynamic slice ..................................................   Passed    0.12 sec
+	        Start 149: test dynamic slice update
+	149/267 Test #149: test dynamic slice update ...........................................   Passed    0.09 sec
+	        Start 150: test split
+	150/267 Test #150: test split ..........................................................   Passed    0.12 sec
+	        Start 151: test flip
+	151/267 Test #151: test flip ...........................................................   Passed    0.12 sec
+	        Start 152: test unstack
+	152/267 Test #152: test unstack ........................................................   Passed    0.12 sec
+	        Start 153: test swap and move axes
+	153/267 Test #153: test swap and move axes .............................................   Passed    0.07 sec
+	        Start 154: test transpose
+	154/267 Test #154: test transpose ......................................................   Passed    0.11 sec
+	        Start 155: test comparison ops
+	155/267 Test #155: test comparison ops .................................................   Passed    0.11 sec
+	        Start 156: test is nan
+	156/267 Test #156: test is nan .........................................................   Passed    0.09 sec
+	        Start 157: test is inf
+	157/267 Test #157: test is inf .........................................................   Passed    0.13 sec
+	        Start 158: test all close
+	158/267 Test #158: test all close ......................................................   Passed    0.15 sec
+	        Start 159: test is close
+	159/267 Test #159: test is close .......................................................   Passed    0.11 sec
+	        Start 160: test reduction ops
+	160/267 Test #160: test reduction ops ..................................................   Passed    1.34 sec
+	        Start 161: test irregular binary ops
+	161/267 Test #161: test irregular binary ops ...........................................   Passed    0.12 sec
+	        Start 162: test arithmetic unary ops
+	162/267 Test #162: test arithmetic unary ops ...........................................   Passed    0.70 sec
+	        Start 163: test error functions
+	163/267 Test #163: test error functions ................................................   Passed    0.13 sec
+	        Start 164: test arithmetic binary ops
+	164/267 Test #164: test arithmetic binary ops ..........................................   Passed    0.39 sec
+	        Start 165: test broadcast
+	165/267 Test #165: test broadcast ......................................................   Passed    0.08 sec
+	        Start 166: test gather
+	166/267 Test #166: test gather .........................................................   Passed    0.73 sec
+	        Start 167: test take
+	167/267 Test #167: test take ...........................................................   Passed    3.29 sec
+	        Start 168: test gather contiguity
+	168/267 Test #168: test gather contiguity ..............................................   Passed    0.11 sec
+	        Start 169: test take along axis
+	169/267 Test #169: test take along axis ................................................   Passed    2.37 sec
+	        Start 170: test put along axis
+	170/267 Test #170: test put along axis .................................................   Passed    0.11 sec
+	        Start 171: test scatter
+	171/267 Test #171: test scatter ........................................................   Passed    0.45 sec
+	        Start 172: test masked_scatter
+	172/267 Test #172: test masked_scatter .................................................   Passed    0.06 sec
+	        Start 173: test is positive infinity
+	173/267 Test #173: test is positive infinity ...........................................   Passed    0.12 sec
+	        Start 174: test is negative infinity
+	174/267 Test #174: test is negative infinity ...........................................   Passed    0.12 sec
+	        Start 175: test scatter types
+	175/267 Test #175: test scatter types ..................................................   Passed    0.18 sec
+	        Start 176: test complex ops
+	176/267 Test #176: test complex ops ....................................................   Passed    0.40 sec
+	        Start 177: test as_strided op
+	177/267 Test #177: test as_strided op ..................................................   Passed    0.11 sec
+	        Start 178: test scan op
+	178/267 Test #178: test scan op ........................................................   Passed    0.08 sec
+	        Start 179: test pad
+	179/267 Test #179: test pad ............................................................   Passed    0.09 sec
+	        Start 180: test power
+	180/267 Test #180: test power ..........................................................   Passed    0.80 sec
+	        Start 181: test where
+	181/267 Test #181: test where ..........................................................   Passed    0.13 sec
+	        Start 182: test stack
+	182/267 Test #182: test stack ..........................................................   Passed    0.07 sec
+	        Start 183: test full_like
+	183/267 Test #183: test full_like ......................................................   Passed    0.07 sec
+	        Start 184: test eye
+	184/267 Test #184: test eye ............................................................   Passed    0.09 sec
+	        Start 185: test tri
+	185/267 Test #185: test tri ............................................................   Passed    0.09 sec
+	        Start 186: test tril
+	186/267 Test #186: test tril ...........................................................   Passed    0.11 sec
+	        Start 187: test triu
+	187/267 Test #187: test triu ...........................................................   Passed    0.10 sec
+	        Start 188: test identity
+	188/267 Test #188: test identity .......................................................   Passed    0.11 sec
+	        Start 189: test eye with positive k offset
+	189/267 Test #189: test eye with positive k offset .....................................   Passed    0.07 sec
+	        Start 190: test eye with negative k offset
+	190/267 Test #190: test eye with negative k offset .....................................   Passed    0.11 sec
+	        Start 191: test basic clipping
+	191/267 Test #191: test basic clipping .................................................   Passed    0.36 sec
+	        Start 192: test clipping with only min
+	192/267 Test #192: test clipping with only min .........................................   Passed    0.08 sec
+	        Start 193: test clipping with only max
+	193/267 Test #193: test clipping with only max .........................................   Passed    0.35 sec
+	        Start 194: test linspace
+	194/267 Test #194: test linspace .......................................................   Passed    0.12 sec
+	        Start 195: test quantize dequantize
+	195/267 Test #195: test quantize dequantize ............................................   Passed    0.12 sec
+	        Start 196: test repeat
+	196/267 Test #196: test repeat .........................................................   Passed    0.06 sec
+	        Start 197: tile
+	197/267 Test #197: tile ................................................................   Passed    0.12 sec
+	        Start 198: tensordot
+	198/267 Test #198: tensordot ...........................................................   Passed    0.14 sec
+	        Start 199: outer
+	199/267 Test #199: outer ...............................................................   Passed    0.08 sec
+	        Start 200: inner
+	200/267 Test #200: inner ...............................................................   Passed    0.14 sec
+	        Start 201: test divmod
+	201/267 Test #201: test divmod .........................................................   Passed    0.08 sec
+	        Start 202: test diagonal
+	202/267 Test #202: test diagonal .......................................................   Passed    0.15 sec
+	        Start 203: test diag
+	203/267 Test #203: test diag ...........................................................   Passed    0.13 sec
+	        Start 204: test issubdtype
+	204/267 Test #204: test issubdtype .....................................................   Passed    0.08 sec
+	        Start 205: test atleast_1d
+	205/267 Test #205: test atleast_1d .....................................................   Passed    0.07 sec
+	        Start 206: test atleast_1d vector
+	206/267 Test #206: test atleast_1d vector ..............................................   Passed    0.11 sec
+	        Start 207: test atleast_2d
+	207/267 Test #207: test atleast_2d .....................................................   Passed    0.10 sec
+	        Start 208: test atleast_2d vector
+	208/267 Test #208: test atleast_2d vector ..............................................   Passed    0.07 sec
+	        Start 209: test atleast_3d
+	209/267 Test #209: test atleast_3d .....................................................   Passed    0.07 sec
+	        Start 210: test atleast_3d vector
+	210/267 Test #210: test atleast_3d vector ..............................................   Passed    0.06 sec
+	        Start 211: test topk
+	211/267 Test #211: test topk ...........................................................   Passed    0.11 sec
+	        Start 212: test meshgrid
+	212/267 Test #212: test meshgrid .......................................................   Passed    0.08 sec
+	        Start 213: test conv1d
+	213/267 Test #213: test conv1d .........................................................   Passed    0.09 sec
+	        Start 214: test conv2d
+	214/267 Test #214: test conv2d .........................................................   Passed    0.15 sec
+	        Start 215: test trace
+	215/267 Test #215: test trace ..........................................................   Passed    0.14 sec
+	        Start 216: test view
+	216/267 Test #216: test view ...........................................................   Passed    0.11 sec
+	        Start 217: test roll
+	217/267 Test #217: test roll ...........................................................   Passed    0.10 sec
+	        Start 218: test contiguous
+	218/267 Test #218: test contiguous .....................................................   Passed    0.11 sec
+	        Start 219: test bitwise shift operations
+	219/267 Test #219: test bitwise shift operations .......................................   Passed    0.17 sec
+	        Start 220: test conv_transpose1d with output_padding
+	220/267 Test #220: test conv_transpose1d with output_padding ...........................   Passed    0.09 sec
+	        Start 221: test conv_transpose2d with output_padding
+	221/267 Test #221: test conv_transpose2d with output_padding ...........................   Passed    0.08 sec
+	        Start 222: test conv_transpose3d with output_padding
+	222/267 Test #222: test conv_transpose3d with output_padding ...........................   Passed    0.11 sec
+	        Start 223: test fp8 conversion
+	223/267 Test #223: test fp8 conversion .................................................   Passed    0.12 sec
+	        Start 224: test max min with nan
+	224/267 Test #224: test max min with nan ...............................................   Passed    0.10 sec
+	        Start 225: roll and tile shape overflow
+	225/267 Test #225: roll and tile shape overflow ........................................   Passed    0.10 sec
+	        Start 226: test random key
+	226/267 Test #226: test random key .....................................................   Passed    0.12 sec
+	        Start 227: test global rng
+	227/267 Test #227: test global rng .....................................................   Passed    0.07 sec
+	        Start 228: test random split
+	228/267 Test #228: test random split ...................................................   Passed    0.10 sec
+	        Start 229: test random bits
+	229/267 Test #229: test random bits ....................................................   Passed    1.09 sec
+	        Start 230: test random uniform
+	230/267 Test #230: test random uniform .................................................   Passed    1.05 sec
+	        Start 231: test random normal
+	231/267 Test #231: test random normal ..................................................   Passed    0.82 sec
+	        Start 232: test random multivariate_normal
+	232/267 Test #232: test random multivariate_normal .....................................   Passed    0.07 sec
+	        Start 233: test random randint
+	233/267 Test #233: test random randint .................................................   Passed    0.72 sec
+	        Start 234: test random bernoulli
+	234/267 Test #234: test random bernoulli ...............................................   Passed    0.10 sec
+	        Start 235: Test truncated normal
+	235/267 Test #235: Test truncated normal ...............................................   Passed    0.55 sec
+	        Start 236: test categorical
+	236/267 Test #236: test categorical ....................................................   Passed    1.01 sec
+	        Start 237: test laplace
+	237/267 Test #237: test laplace ........................................................   Passed    1.17 sec
+	        Start 238: test stream management
+	238/267 Test #238: test stream management ..............................................   Passed    0.08 sec
+	        Start 239: test default stream in threads
+	239/267 Test #239: test default stream in threads ......................................   Passed    0.05 sec
+	        Start 240: test access stream in other thread
+	240/267 Test #240: test access stream in other thread ..................................   Passed    0.06 sec
+	        Start 241: test new stream in threads
+	241/267 Test #241: test new stream in threads ..........................................   Passed    0.08 sec
+	        Start 242: test thread unsafe stream
+	242/267 Test #242: test thread unsafe stream ...........................................   Passed    0.10 sec
+	        Start 243: test thread local stream
+	243/267 Test #243: test thread local stream ............................................   Passed    0.09 sec
+	        Start 244: test get streams
+	244/267 Test #244: test get streams ....................................................   Passed    0.05 sec
+	        Start 245: test asynchronous launch
+	245/267 Test #245: test asynchronous launch ............................................   Passed    0.10 sec
+	        Start 246: test stream placement
+	246/267 Test #246: test stream placement ...............................................   Passed    0.06 sec
+	        Start 247: test scheduler races
+	247/267 Test #247: test scheduler races ................................................   Passed    0.77 sec
+	        Start 248: test type promotion
+	248/267 Test #248: test type promotion .................................................   Passed    0.07 sec
+	        Start 249: test normalize axis
+	249/267 Test #249: test normalize axis .................................................   Passed    0.09 sec
+	        Start 250: test finfo
+	250/267 Test #250: test finfo ..........................................................   Passed    0.08 sec
+	        Start 251: test iinfo
+	251/267 Test #251: test iinfo ..........................................................   Passed    0.08 sec
+	        Start 252: test simple vmap
+	252/267 Test #252: test simple vmap ....................................................   Passed    0.18 sec
+	        Start 253: test vmap with eval
+	253/267 Test #253: test vmap with eval .................................................   Passed    0.10 sec
+	        Start 254: test vmap comparison ops
+	254/267 Test #254: test vmap comparison ops ............................................   Passed    0.09 sec
+	        Start 255: test vmap creation ops
+	255/267 Test #255: test vmap creation ops ..............................................   Passed    0.13 sec
+	        Start 256: test vmap slice
+	256/267 Test #256: test vmap slice .....................................................   Passed    0.12 sec
+	        Start 257: test vmap concatenate
+	257/267 Test #257: test vmap concatenate ...............................................   Passed    0.12 sec
+	        Start 258: test vmap gather
+	258/267 Test #258: test vmap gather ....................................................   Passed    0.06 sec
+	        Start 259: test vmap take_along_axis with unmapped input and mapped index
+	259/267 Test #259: test vmap take_along_axis with unmapped input and mapped index ......   Passed    0.08 sec
+	        Start 260: test vmap scatter
+	260/267 Test #260: test vmap scatter ...................................................   Passed    0.10 sec
+	        Start 261: test vmap SVD
+	261/267 Test #261: test vmap SVD .......................................................   Passed    0.09 sec
+	        Start 262: test vmap dynamic slices
+	262/267 Test #262: test vmap dynamic slices ............................................   Passed    0.12 sec
+	        Start 263: test vmap floor_divide integer
+	263/267 Test #263: test vmap floor_divide integer ......................................   Passed    0.14 sec
+	        Start 264: test vulkan complex scalar view multiply regression
+	264/267 Test #264: test vulkan complex scalar view multiply regression .................   Passed    0.06 sec
+	        Start 265: test vulkan complex abs general layout regression
+	265/267 Test #265: test vulkan complex abs general layout regression ...................   Passed    0.09 sec
+	        Start 266: tests
+	266/267 Test #266: tests ...............................................................   Passed   38.80 sec
+	        Start 267: teardown
+	267/267 Test #267: teardown ............................................................   Passed    1.09 sec
+	
+	100% tests passed, 0 tests failed out of 267
+	
+	Total Test time (real) = 115.97 sec
+
+
+
+---
 2026.7.28
 
 Align to MLX 0.3.20 release, with extra test cases on deep-wise conv and layer normalization.

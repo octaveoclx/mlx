@@ -473,7 +473,7 @@ class MLX_API array {
  private:
   // Initialize the arrays data
   template <typename It>
-  void init(const It src);
+  void init(It src);
 
   struct MLX_API ArrayDesc {
     Shape shape;

@@ -3,9 +3,11 @@
 This document summarizes the current state of the MLX OpenCL backend, highlighting key features, implemented primitives, and the overall progress. The backend aims to provide a complete, high‑performance OpenCL implementation of MLX’s core operations, with a focus on portability and distributed training.
 ---
 
-Sep 7 2026 All Python test cases are OK with many bug fixes.
+Sept. 8 2026 Enhanced timing when falling back to CPU for Linear Algebra Computation when CLMAGMA_PATH is not set for GPU computing.
 
-Sep 1 2026 Add more test cases and new improvement regardless of the precision difference errors.
+Sept. 7 2026 All Python test cases are OK with many bug fixes.
+
+Sept. 1 2026 Add more test cases and new improvement regardless of the precision difference errors.
 Python test cases are still going on with many bug fixes.
 
 	(base) jc@U1:~/Documents/mlx-opencl82815/mlx-opencl/build$ make test
